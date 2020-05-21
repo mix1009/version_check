@@ -42,10 +42,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final versionCheck = VersionCheck(
-      packageName: Platform.isIOS
-          ? 'com.tachyonfactory.iconFinder'
-          : 'com.tachyonfactory.icon_finder',
-      packageVersion: '1.0.1');
+    packageName: Platform.isIOS
+        ? 'com.tachyonfactory.iconFinder'
+        : 'com.tachyonfactory.icon_finder',
+    packageVersion: '1.0.1',
+    showUpdateDialog: customShowUpdateDialog,
+  );
 
   Future checkVersion() async {
     await versionCheck.checkVersion(context);
@@ -90,4 +92,38 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    child: AlertDialog(
+      title: Text('NEW Update Available'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text(
+                'Do you REALLY want to update to ${versionCheck.storeVersion}?'),
+            Text('(current version ${versionCheck.packageVersion})'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Update'),
+          onPressed: () async {
+            await versionCheck.launchStore();
+            Navigator.of(context).pop();
+          },
+        ),
+        FlatButton(
+          child: Text('Close'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    ),
+  );
 }

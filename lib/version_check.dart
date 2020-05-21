@@ -10,7 +10,8 @@ import 'dart:math' as math;
 import 'package:package_info/package_info.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// typedef Future<StoreVersionAndUrl> getStoreVersionAndUrl(String);
+typedef Future<StoreVersionAndUrl> GetStoreVersionAndUrl(String packageName);
+typedef void ShowUpdateDialog(BuildContext context, VersionCheck versionCheck);
 
 class StoreVersionAndUrl {
   final String storeVersion;
@@ -25,13 +26,18 @@ class VersionCheck {
   String storeVersion;
   String storeUrl;
 
+  GetStoreVersionAndUrl getStoreVersionAndUrl;
+  ShowUpdateDialog showUpdateDialog;
+
   /// VersionCheck constructor
   ///
-  /// optional packageName : uses package_info if not provided
-  /// optional packageVersion : uses package_info if not provided
+  /// optional packageName : uses package_info if not provided.
+  /// optional packageVersion : uses package_info if not provided.
   VersionCheck({
     this.packageName,
     this.packageVersion,
+    this.getStoreVersionAndUrl,
+    this.showUpdateDialog,
   });
 
   /// check version from iOS/Android/Mac store and
@@ -42,62 +48,30 @@ class VersionCheck {
     packageName ??= packageInfo.packageName;
     packageVersion ??= packageInfo.version;
 
-    switch (Platform.operatingSystem) {
-      case 'android':
-        final storeVersionAndUrl =
-            await _getAndroidStoreVersionAndUrl(packageName);
-        storeVersion = storeVersionAndUrl.storeVersion;
-        storeUrl = storeVersionAndUrl.storeUrl;
-        break;
-      case 'ios':
-        final storeVersionAndUrl = await _getIOSStoreVersionAndUrl(packageName);
-        storeVersion = storeVersionAndUrl.storeVersion;
-        storeUrl = storeVersionAndUrl.storeUrl;
-        break;
-      case 'macos':
-        final storeVersionAndUrl = await _getMacStoreVersionAndUrl(packageName);
-        storeVersion = storeVersionAndUrl.storeVersion;
-        storeUrl = storeVersionAndUrl.storeUrl;
-        break;
-      default:
-        throw "Platform ${Platform.operatingSystem} not supported.";
+    if (getStoreVersionAndUrl == null) {
+      switch (Platform.operatingSystem) {
+        case 'android':
+          getStoreVersionAndUrl = _getAndroidStoreVersionAndUrl;
+          break;
+        case 'ios':
+          getStoreVersionAndUrl = _getIOSStoreVersionAndUrl;
+          break;
+        case 'macos':
+          getStoreVersionAndUrl = _getMacStoreVersionAndUrl;
+          break;
+        default:
+          throw "Platform ${Platform.operatingSystem} not supported.";
+      }
     }
+
+    final storeVersionAndUrl = await getStoreVersionAndUrl(packageName);
+    storeVersion = storeVersionAndUrl.storeVersion;
+    storeUrl = storeVersionAndUrl.storeUrl;
 
     if (hasUpdate) {
-      showUpdateDialog(context);
+      showUpdateDialog ??= _showUpdateDialog;
+      showUpdateDialog(context, this);
     }
-  }
-
-  void showUpdateDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      child: AlertDialog(
-        title: Text('Update Available'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text('Do you want to update to $storeVersion?'),
-              Text('(current version $packageVersion)'),
-            ],
-          ),
-        ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Update'),
-            onPressed: () async {
-              await launchStore();
-              Navigator.of(context).pop();
-            },
-          ),
-          FlatButton(
-            child: Text('Close'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   get hasUpdate {
@@ -200,4 +174,37 @@ bool _shouldUpdate(String packageVersion, String storeVersion) {
   }
 
   return false;
+}
+
+void _showUpdateDialog(BuildContext context, VersionCheck versionCheck) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    child: AlertDialog(
+      title: Text('Update Available'),
+      content: SingleChildScrollView(
+        child: ListBody(
+          children: <Widget>[
+            Text('Do you want to update to ${versionCheck.storeVersion}?'),
+            Text('(current version ${versionCheck.packageVersion})'),
+          ],
+        ),
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: Text('Update'),
+          onPressed: () async {
+            Navigator.of(context).pop();
+            await versionCheck.launchStore();
+          },
+        ),
+        FlatButton(
+          child: Text('Close'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
+    ),
+  );
 }

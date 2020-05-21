@@ -12,6 +12,9 @@ Future<String> getIOSStoreVersion(String bundleId) async {
 
   if (resp.statusCode == 200) {
     final j = json.decode(resp.body);
+    for (final key in j['results'][0].keys) {
+      print('$key => ${j["results"][0][key]}');
+    }
     final version = j['results'][0]['version'];
     return version;
   }

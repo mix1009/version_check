@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'version_check Demo'),
+      home: MyHomePage(title: 'version_check demo'),
     );
   }
 }
@@ -33,6 +33,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   String version = '';
   String storeVersion = '';
+  String storeUrl = '';
   String packageName = '';
   @override
   void initState() {
@@ -40,16 +41,19 @@ class _MyHomePageState extends State<MyHomePage> {
     checkVersion();
   }
 
+  final versionCheck = VersionCheck(
+      packageName: Platform.isIOS
+          ? 'com.tachyonfactory.iconFinder'
+          : 'com.tachyonfactory.icon_finder',
+      packageVersion: '1.0.1');
+
   Future checkVersion() async {
-    final versionCheck = VersionCheck(
-        packageName: Platform.isIOS
-            ? 'com.tachyonfactory.iconFinder'
-            : 'com.tachyonfactory.icon_finder');
-    await versionCheck.checkVersion();
+    await versionCheck.checkVersion(context);
     setState(() {
       version = versionCheck.packageVersion;
       packageName = versionCheck.packageName;
       storeVersion = versionCheck.storeVersion;
+      storeUrl = versionCheck.storeUrl;
     });
   }
 
@@ -70,10 +74,19 @@ class _MyHomePageState extends State<MyHomePage> {
               'storeVersion = $storeVersion',
             ),
             Text(
+              'storeUrl = $storeUrl',
+            ),
+            Text(
               'packageName = $packageName',
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.store),
+        onPressed: () async {
+          await versionCheck.launchStore();
+        },
       ),
     );
   }

@@ -22,19 +22,19 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+  MyHomePage({Key? key, this.title}) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String version = '';
-  String storeVersion = '';
-  String storeUrl = '';
-  String packageName = '';
+  String? version = '';
+  String? storeVersion = '';
+  String? storeUrl = '';
+  String? packageName = '';
   @override
   void initState() {
     super.initState();
@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title!),
       ),
       body: Center(
         child: Column(
@@ -98,7 +98,7 @@ void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
   showDialog(
     context: context,
     barrierDismissible: false,
-    child: AlertDialog(
+    builder: (context) => AlertDialog(
       title: Text('NEW Update Available'),
       content: SingleChildScrollView(
         child: ListBody(
@@ -110,14 +110,14 @@ void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
         ),
       ),
       actions: <Widget>[
-        FlatButton(
+        TextButton(
           child: Text('Update'),
           onPressed: () async {
             await versionCheck.launchStore();
             Navigator.of(context).pop();
           },
         ),
-        FlatButton(
+        TextButton(
           child: Text('Close'),
           onPressed: () {
             Navigator.of(context).pop();

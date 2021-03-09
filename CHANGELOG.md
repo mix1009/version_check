@@ -1,3 +1,7 @@
+## [0.2.0] - 2021/03/09
+
+* null safety
+
 ## [0.1.1] - 2020/05/21
 
 * getStoreVersionAndUrl can be passed to constructor to override fetching version and url info.

@@ -1,12 +1,11 @@
 library version_check;
 
-import 'dart:io';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
-import 'dart:math' as math;
+import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:html/parser.dart' show parse;
+import 'package:http/http.dart' as http;
 import 'package:package_info/package_info.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -163,18 +162,18 @@ Future<StoreVersionAndUrl?> _getMacStoreVersionAndUrl(String bundleId) async {
 bool _shouldUpdate(String? packageVersion, String? storeVersion) {
   if (packageVersion == storeVersion) return false;
 
-  final arr1 = packageVersion!.split('.');
-  final arr2 = storeVersion!.split('.');
+  final string1 = packageVersion!.replaceAll('.', '');
+  final string2 = storeVersion!.replaceAll('.', '');
 
-  for (int i = 0; i < math.min(arr1.length, arr2.length); i++) {
-    int? v1 = int.tryParse(arr1[i]);
-    int? v2 = int.tryParse(arr2[i]);
+  final v1 = int.tryParse(string1);
+  final v2 = int.tryParse(string2);
 
-    if (v1 == null || v2 == null) {
-      if (arr2[i].compareTo(arr1[i]) > 0) {
-        return true;
-      }
-    } else if (v2 > v1) {
+  if (v1 == null || v2 == null) {
+    if (string2.compareTo(string1) > 0) {
+      return true;
+    }
+  } else {
+    if (v2 > v1) {
       return true;
     }
   }

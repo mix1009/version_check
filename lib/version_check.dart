@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' show parse;
 import 'dart:math' as math;
 
-import 'package:package_info/package_info.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 typedef Future<StoreVersionAndUrl?> GetStoreVersionAndUrl(String packageName);

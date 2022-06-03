@@ -1,3 +1,7 @@
+## [0.2.0+1]
+
+* Migrated from the deprecated package_info plugin to package_info_plus.
+
 ## [0.2.0] - 2021/03/09
 
 * null safety

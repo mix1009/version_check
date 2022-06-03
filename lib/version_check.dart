@@ -78,6 +78,7 @@ class VersionCheck {
     }
   }
 
+  /// check if update is available
   get hasUpdate {
     if (packageVersion == null) return false;
     if (storeVersion == null) return false;
@@ -86,9 +87,9 @@ class VersionCheck {
 
   /// launch store for update
   Future launchStore() async {
-    final url = storeUrl!;
-    if (await canLaunch(url)) {
-      await launch(url);
+    final url = Uri.parse(storeUrl!);
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
       throw 'Could not launch $url';
     }
@@ -132,6 +133,17 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
       final version = cv.nextElementSibling!.text;
       return StoreVersionAndUrl(version, url);
     } catch (_) {}
+    try {
+      final elements = doc.getElementsByTagName('script');
+
+      for (var e in elements) {
+        var match = new RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
+        if (match != null) {
+          return StoreVersionAndUrl(match.group(1)!, url);
+        }
+      }
+    } catch (_) {}
+
     try {
       final elements = doc.querySelectorAll('div');
 

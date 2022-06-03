@@ -1,11 +1,11 @@
 name: version_check
 description: Check iOS/Android/Mac store version and provide update alert if update is available.
-version: 0.2.0+1
+version: 0.2.1
 #author: ChunKoo Park <mix1009@gmail.com>
 homepage: https://github.com/mix1009/version_check
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=2.14.0 <3.0.0'
 
 dependencies:
   flutter:

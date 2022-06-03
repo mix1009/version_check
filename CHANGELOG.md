@@ -1,6 +1,10 @@
-## [0.2.0+1]
+## [0.2.1] - 2022/06/03
 
-* Migrated from the deprecated package_info plugin to package_info_plus.
+* fix getting play store version due to web page change. (It will only work when version is formatted as '1.2.3') 
+
+## [0.2.0+1] - 2022/08/05
+
+* Migrated from the deprecated package_info plugin to package_info_plus. (contributed by https://github.com/lscbot)
 
 ## [0.2.0] - 2021/03/09
 

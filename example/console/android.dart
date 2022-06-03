@@ -19,6 +19,7 @@ Future<String?> getAndroidStoreVersion(String packageName) async {
 
   if (resp.statusCode == 200) {
     final doc = parse(resp.body);
+    // File('android.html').writeAsStringSync(resp.body);
 
     try {
       final elements = doc.querySelectorAll('.hAyfc .BgcNfc');
@@ -26,6 +27,16 @@ Future<String?> getAndroidStoreVersion(String packageName) async {
       final cv =
           elements.firstWhere((element) => element.text == 'Current Version');
       return cv.nextElementSibling!.text;
+    } catch (_) {}
+    try {
+      final elements = doc.getElementsByTagName('script');
+
+      for (var e in elements) {
+        var match = new RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
+        if (match != null) {
+          return match.group(1);
+        }
+      }
     } catch (_) {}
     try {
       final elements = doc.querySelectorAll('div');

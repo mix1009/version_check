@@ -14,7 +14,7 @@ dependencies:
   version_check:
     path: ../
 
-  cupertino_icons: ^0.1.3
+  cupertino_icons: ^1.0.4
 
 dev_dependencies:
   flutter_test:

@@ -20,11 +20,14 @@ class StoreVersionAndUrl {
   StoreVersionAndUrl(this.storeVersion, this.storeUrl);
 }
 
+String _country = 'us';
+
 class VersionCheck {
   String? packageName;
   String? packageVersion;
   String? storeVersion;
   String? storeUrl;
+  String? country;
 
   GetStoreVersionAndUrl? getStoreVersionAndUrl;
   ShowUpdateDialog? showUpdateDialog;
@@ -35,11 +38,13 @@ class VersionCheck {
   /// optional packageVersion : uses package_info if not provided.
   /// optional getStoreVersionUrl : function for getting version and url from store. (too override default implementation)
   /// optional showUpdateDialog : function for displaying custom update dialog.
+  /// optional country : for ios/mac version check (default: 'us').
   VersionCheck({
     this.packageName,
     this.packageVersion,
     this.getStoreVersionAndUrl,
     this.showUpdateDialog,
+    this.country,
   });
 
   /// check version from iOS/Android/Mac store and
@@ -49,6 +54,7 @@ class VersionCheck {
 
     packageName ??= packageInfo.packageName;
     packageVersion ??= packageInfo.version;
+    _country = country ?? 'us';
 
     if (getStoreVersionAndUrl == null) {
       switch (Platform.operatingSystem) {
@@ -97,7 +103,8 @@ class VersionCheck {
 }
 
 Future<StoreVersionAndUrl?> _getIOSStoreVersionAndUrl(String bundleId) async {
-  final uri = Uri.https('itunes.apple.com', '/lookup', {'bundleId': bundleId});
+  var params = {'bundleId': bundleId, 'country': _country};
+  final uri = Uri.https('itunes.apple.com', '/lookup', params);
   final resp = await http.get(uri);
 
   if (resp.statusCode == 200) {
@@ -158,7 +165,8 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
 }
 
 Future<StoreVersionAndUrl?> _getMacStoreVersionAndUrl(String bundleId) async {
-  final uri = Uri.https('itunes.apple.com', '/lookup/', {'bundleId': bundleId});
+  var params = {'bundleId': bundleId, 'country': _country};
+  final uri = Uri.https('itunes.apple.com', '/lookup', params);
   final resp = await http.get(uri);
 
   if (resp.statusCode == 200) {

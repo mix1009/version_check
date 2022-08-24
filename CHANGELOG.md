@@ -1,3 +1,8 @@
+## [0.2.2] - 2022/08/24
+
+* add country parameter when requesting ios/mac version info (default='us').
+* optional country argument added to VersionCheck constructor.
+
 ## [0.2.1] - 2022/06/03
 
 * fix getting play store version due to web page change. (It will only work when version is formatted as '1.2.3') 

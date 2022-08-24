@@ -1,6 +1,6 @@
 name: version_check
 description: Check iOS/Android/Mac store version and provide update alert if update is available.
-version: 0.2.1
+version: 0.2.2
 #author: ChunKoo Park <mix1009@gmail.com>
 homepage: https://github.com/mix1009/version_check
 

@@ -47,6 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
         : 'com.tachyonfactory.icon_finder',
     packageVersion: '1.0.1',
     showUpdateDialog: customShowUpdateDialog,
+    country: 'kr',
   );
 
   Future checkVersion() async {

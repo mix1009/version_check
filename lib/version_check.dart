@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:version/version.dart';
 
 typedef Future<StoreVersionAndUrl?> GetStoreVersionAndUrl(String packageName);
 typedef void ShowUpdateDialog(BuildContext context, VersionCheck versionCheck);
@@ -88,7 +89,7 @@ class VersionCheck {
   get hasUpdate {
     if (packageVersion == null) return false;
     if (storeVersion == null) return false;
-    return _shouldUpdate(packageVersion, storeVersion);
+    return _shouldUpdate(packageVersion!, storeVersion!);
   }
 
   /// launch store for update
@@ -180,26 +181,10 @@ Future<StoreVersionAndUrl?> _getMacStoreVersionAndUrl(String bundleId) async {
   return null;
 }
 
-bool _shouldUpdate(String? packageVersion, String? storeVersion) {
+bool _shouldUpdate(String packageVersion, String storeVersion) {
   if (packageVersion == storeVersion) return false;
 
-  final arr1 = packageVersion!.split('.');
-  final arr2 = storeVersion!.split('.');
-
-  for (int i = 0; i < math.min(arr1.length, arr2.length); i++) {
-    int? v1 = int.tryParse(arr1[i]);
-    int? v2 = int.tryParse(arr2[i]);
-
-    if (v1 == null || v2 == null) {
-      if (arr2[i].compareTo(arr1[i]) > 0) {
-        return true;
-      }
-    } else if (v2 > v1) {
-      return true;
-    }
-  }
-
-  return false;
+  return Version.parse(packageVersion) < Version.parse(storeVersion);
 }
 
 void _showUpdateDialog(BuildContext context, VersionCheck versionCheck) {

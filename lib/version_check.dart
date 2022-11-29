@@ -100,6 +100,10 @@ class VersionCheck {
       throw 'Could not launch $url';
     }
   }
+
+  static bool shouldUpdate(String? packageVersion, String? storeVersion) {
+    return _shouldUpdate(packageVersion, storeVersion);
+  }
 }
 
 Future<StoreVersionAndUrl?> _getIOSStoreVersionAndUrl(String bundleId) async {
@@ -193,11 +197,17 @@ bool _shouldUpdate(String? packageVersion, String? storeVersion) {
     if (v1 == null || v2 == null) {
       if (arr2[i].compareTo(arr1[i]) > 0) {
         return true;
+      } else if (arr2[i].compareTo(arr1[i]) < 0) {
+        return false;
       }
     } else if (v2 > v1) {
       return true;
+    } else if (v2 < v1) {
+      return false;
     }
   }
+
+  if (arr2.length > arr1.length) return true;
 
   return false;
 }

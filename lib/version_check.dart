@@ -101,6 +101,7 @@ class VersionCheck {
     }
   }
 
+  /// compare packageVersion and storeVersion and return true if update is needed.
   static bool shouldUpdate(String? packageVersion, String? storeVersion) {
     return _shouldUpdate(packageVersion, storeVersion);
   }

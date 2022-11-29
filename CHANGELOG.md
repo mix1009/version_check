@@ -1,3 +1,6 @@
+## [0.3.0] - 2022/11/29
+* fix version compare logic (bug report by DevNico) 
+
 ## [0.2.2] - 2022/08/24
 
 * add country parameter when requesting ios/mac version info (default='us').

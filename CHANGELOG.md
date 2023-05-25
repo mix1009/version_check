@@ -1,3 +1,6 @@
+## [0.4.0] - 2023/05/25
+* upgrade packages for flutter 3.10 (PR by monfadev)
+
 ## [0.3.0] - 2022/11/29
 * fix version compare logic (bug report by DevNico) 
 

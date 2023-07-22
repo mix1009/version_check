@@ -1,9 +1,9 @@
 name: example
 description: A new Flutter project.
 environment:
-  sdk: ">=2.13.0 <3.0.0"
+  sdk: ">=3.0.5 <4.0.0"
 
 dependencies:
-  http: any
-  html: any
+  http: ^1.1.0
+  html: ^0.15.4
 

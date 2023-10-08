@@ -42,15 +42,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   final versionCheck = VersionCheck(
-    packageName: Platform.isIOS
-        ? 'com.tachyonfactory.iconFinder'
-        : 'com.tachyonfactory.icon_finder',
-    packageVersion: '1.0.1',
+    packageName: Platform.isIOS ? 'id.smartpoultrysaas.app' : 'id.telkomiotsaas.app',
+    packageVersion: '2.0.4',
     showUpdateDialog: customShowUpdateDialog,
-    country: 'kr',
+    country: 'id',
   );
 
-  Future checkVersion() async {
+  Future<void> checkVersion() async {
     await versionCheck.checkVersion(context);
     setState(() {
       version = versionCheck.packageVersion;
@@ -69,7 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
             Text(
               'packageVersion = $version',
             ),
@@ -86,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.store),
+        child: const Icon(Icons.store),
         onPressed: () async {
           await versionCheck.launchStore();
         },
@@ -100,26 +98,27 @@ void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
-      title: Text('NEW Update Available'),
+      title: const Text('NEW Update Available'),
       content: SingleChildScrollView(
         child: ListBody(
-          children: <Widget>[
+          children: [
             Text(
-                'Do you REALLY want to update to ${versionCheck.storeVersion}?'),
+              'Do you REALLY want to update to ${versionCheck.storeVersion}?',
+            ),
             Text('(current version ${versionCheck.packageVersion})'),
           ],
         ),
       ),
-      actions: <Widget>[
+      actions: [
         TextButton(
-          child: Text('Update'),
+          child: const Text('Update'),
           onPressed: () async {
             await versionCheck.launchStore();
             Navigator.of(context).pop();
           },
         ),
         TextButton(
-          child: Text('Close'),
+          child: const Text('Close'),
           onPressed: () {
             Navigator.of(context).pop();
           },

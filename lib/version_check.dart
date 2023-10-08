@@ -1,17 +1,17 @@
 library version_check;
 
-import 'dart:io';
 import 'dart:convert';
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:html/parser.dart' show parse;
+import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
+import 'package:html/parser.dart' show parse;
+import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-typedef Future<StoreVersionAndUrl?> GetStoreVersionAndUrl(String packageName);
-typedef void ShowUpdateDialog(BuildContext context, VersionCheck versionCheck);
+typedef GetStoreVersionAndUrl = Future<StoreVersionAndUrl?> Function(String packageName);
+typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck);
 
 class StoreVersionAndUrl {
   final String storeVersion;
@@ -49,8 +49,8 @@ class VersionCheck {
 
   /// check version from iOS/Android/Mac store and
   /// provide update dialog if update is available.
-  Future checkVersion(BuildContext context) async {
-    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  Future<void> checkVersion(BuildContext context) async {
+    final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
     packageName ??= packageInfo.packageName;
     packageVersion ??= packageInfo.version;
@@ -68,7 +68,7 @@ class VersionCheck {
           getStoreVersionAndUrl = _getMacStoreVersionAndUrl;
           break;
         default:
-          throw "Platform ${Platform.operatingSystem} not supported.";
+          throw 'Platform ${Platform.operatingSystem} not supported.';
       }
     }
 
@@ -79,20 +79,21 @@ class VersionCheck {
 
       if (hasUpdate) {
         showUpdateDialog ??= _showUpdateDialog;
+        // ignore: use_build_context_synchronously
         showUpdateDialog!(context, this);
       }
     }
   }
 
   /// check if update is available
-  get hasUpdate {
+  bool get hasUpdate {
     if (packageVersion == null) return false;
     if (storeVersion == null) return false;
     return _shouldUpdate(packageVersion, storeVersion);
   }
 
   /// launch store for update
-  Future launchStore() async {
+  Future<void> launchStore() async {
     final url = Uri.parse(storeUrl!);
     if (await canLaunchUrl(url)) {
       await launchUrl(url);
@@ -108,7 +109,7 @@ class VersionCheck {
 }
 
 Future<StoreVersionAndUrl?> _getIOSStoreVersionAndUrl(String bundleId) async {
-  var params = {'bundleId': bundleId, 'country': _country};
+  final params = {'bundleId': bundleId, 'country': _country};
   final uri = Uri.https('itunes.apple.com', '/lookup', params);
   final resp = await http.get(uri);
 
@@ -122,16 +123,16 @@ Future<StoreVersionAndUrl?> _getIOSStoreVersionAndUrl(String bundleId) async {
   return null;
 }
 
-Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
-    String packageName) async {
-  final uri = Uri.https('play.google.com', '/store/apps/details',
-      {'id': packageName, 'hl': 'en'});
+Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(String packageName) async {
+  final uri = Uri.https('play.google.com', '/store/apps/details', {'id': packageName, 'hl': 'en'});
 
-  final resp = await http.get(uri, headers: {
-    'referer': 'http://www.google.com',
-    'user-agent':
-        "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6",
-  });
+  final resp = await http.get(
+    uri,
+    headers: {
+      'referer': 'http://www.google.com',
+      'user-agent': 'Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6',
+    },
+  );
 
   if (resp.statusCode == 200) {
     final doc = parse(resp.body);
@@ -140,16 +141,16 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
     try {
       final elements = doc.querySelectorAll('.hAyfc .BgcNfc');
 
-      final cv =
-          elements.firstWhere((element) => element.text == 'Current Version');
+      final cv = elements.firstWhere((element) => element.text == 'Current Version');
       final version = cv.nextElementSibling!.text;
       return StoreVersionAndUrl(version, url);
     } catch (_) {}
     try {
       final elements = doc.getElementsByTagName('script');
 
-      for (var e in elements) {
-        var match = new RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
+      for (final e in elements) {
+        // ignore: unnecessary_string_escapes
+        final match = RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
         if (match != null) {
           return StoreVersionAndUrl(match.group(1)!, url);
         }
@@ -159,8 +160,7 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
     try {
       final elements = doc.querySelectorAll('div');
 
-      final cv =
-          elements.firstWhere((element) => element.text == 'Current Version');
+      final cv = elements.firstWhere((element) => element.text == 'Current Version');
       final version = cv.nextElementSibling!.text;
       return StoreVersionAndUrl(version, url);
     } catch (_) {}
@@ -170,13 +170,12 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
 }
 
 Future<StoreVersionAndUrl?> _getMacStoreVersionAndUrl(String bundleId) async {
-  var params = {'bundleId': bundleId, 'country': _country};
+  final params = {'bundleId': bundleId, 'country': _country};
   final uri = Uri.https('itunes.apple.com', '/lookup', params);
   final resp = await http.get(uri);
 
   if (resp.statusCode == 200) {
     final j = json.decode(resp.body);
-    // print(j);
     final version = j['results'][0]['version'];
     final url = j['results'][0]['trackViewUrl'];
     return StoreVersionAndUrl(version, url);
@@ -192,8 +191,8 @@ bool _shouldUpdate(String? packageVersion, String? storeVersion) {
   final arr2 = storeVersion!.split('.');
 
   for (int i = 0; i < math.min(arr1.length, arr2.length); i++) {
-    int? v1 = int.tryParse(arr1[i]);
-    int? v2 = int.tryParse(arr2[i]);
+    final int? v1 = int.tryParse(arr1[i]);
+    final int? v2 = int.tryParse(arr2[i]);
 
     if (v1 == null || v2 == null) {
       if (arr2[i].compareTo(arr1[i]) > 0) {
@@ -218,25 +217,25 @@ void _showUpdateDialog(BuildContext context, VersionCheck versionCheck) {
     context: context,
     barrierDismissible: false,
     builder: (context) => AlertDialog(
-      title: Text('Update Available'),
+      title: const Text('Update Available'),
       content: SingleChildScrollView(
         child: ListBody(
-          children: <Widget>[
+          children: [
             Text('Do you want to update to ${versionCheck.storeVersion}?'),
             Text('(current version ${versionCheck.packageVersion})'),
           ],
         ),
       ),
-      actions: <Widget>[
+      actions: [
         TextButton(
-          child: Text('Update'),
+          child: const Text('Update'),
           onPressed: () async {
             Navigator.of(context).pop();
             await versionCheck.launchStore();
           },
         ),
         TextButton(
-          child: Text('Close'),
+          child: const Text('Close'),
           onPressed: () {
             Navigator.of(context).pop();
           },

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -35,29 +36,29 @@ class _MyHomePageState extends State<MyHomePage> {
   String? storeVersion = '';
   String? storeUrl = '';
   String? packageName = '';
-  @override
-  void initState() {
-    super.initState();
-    checkVersion();
-  }
 
   final versionCheck = VersionCheck(
-    packageName: Platform.isIOS
-        ? 'com.tachyonfactory.iconFinder'
-        : 'com.tachyonfactory.icon_finder',
+    packageName: Platform.isIOS ? 'com.tachyonfactory.iconFinder' : 'com.tachyonfactory.icon_finder',
     packageVersion: '1.0.1',
     showUpdateDialog: customShowUpdateDialog,
     country: 'kr',
   );
 
-  Future checkVersion() async {
+  Future<void> checkVersion() async {
     await versionCheck.checkVersion(context);
+
     setState(() {
       version = versionCheck.packageVersion;
       packageName = versionCheck.packageName;
       storeVersion = versionCheck.storeVersion;
       storeUrl = versionCheck.storeUrl;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkVersion();
   }
 
   @override
@@ -69,7 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
             Text(
               'packageVersion = $version',
             ),
@@ -86,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.store),
+        child: const Icon(Icons.store),
         onPressed: () async {
           await versionCheck.launchStore();
         },
@@ -99,32 +100,34 @@ void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (context) => AlertDialog(
-      title: Text('NEW Update Available'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: <Widget>[
-            Text(
-                'Do you REALLY want to update to ${versionCheck.storeVersion}?'),
-            Text('(current version ${versionCheck.packageVersion})'),
-          ],
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('NEW Update Available'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text(
+                'Do you REALLY want to update to ${versionCheck.storeVersion}?',
+              ),
+              Text('(current version ${versionCheck.packageVersion})'),
+            ],
+          ),
         ),
-      ),
-      actions: <Widget>[
-        TextButton(
-          child: Text('Update'),
-          onPressed: () async {
-            await versionCheck.launchStore();
-            Navigator.of(context).pop();
-          },
-        ),
-        TextButton(
-          child: Text('Close'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            child: const Text('Update'),
+            onPressed: () async {
+              await versionCheck.launchStore();
+            },
+          ),
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
   );
 }

@@ -15,8 +15,8 @@ bool shouldUpdate(String packageVersion, String storeVersion) {
   final arr2 = storeVersion.split('.');
 
   for (int i = 0; i < math.min(arr1.length, arr2.length); i++) {
-    int? v1 = int.tryParse(arr1[i]);
-    int? v2 = int.tryParse(arr2[i]);
+    final int? v1 = int.tryParse(arr1[i]);
+    final int? v2 = int.tryParse(arr2[i]);
 
     if (v1 == null || v2 == null) {
       if (arr2[i].compareTo(arr1[i]) > 0) {

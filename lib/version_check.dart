@@ -1,7 +1,6 @@
 library version_check;
 
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -56,9 +55,7 @@ class VersionCheck {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
     packageName ??= packageInfo.packageName;
-    log('packageName $packageName');
     packageVersion ??= packageInfo.version;
-    log('packageVersion $packageVersion');
     _country = country ?? 'us';
 
     if (getStoreVersionAndUrl == null) {

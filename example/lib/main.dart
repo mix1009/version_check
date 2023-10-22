@@ -31,7 +31,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
+class _MyHomePageState extends State<MyHomePage> {
   String? version = '';
   String? storeVersion = '';
   String? storeUrl = '';
@@ -46,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> checkVersion() async {
     await versionCheck.checkVersion(context);
+
     setState(() {
       version = versionCheck.packageVersion;
       packageName = versionCheck.packageName;
@@ -57,22 +58,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
     checkVersion();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    super.didChangeAppLifecycleState(state);
-    if (state == AppLifecycleState.paused) {
-      checkVersion();
-    }
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
   }
 
   @override
@@ -114,34 +100,34 @@ void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (context) => AlertDialog(
-      title: const Text('NEW Update Available'),
-      content: SingleChildScrollView(
-        child: ListBody(
-          children: [
-            Text(
-              'Do you REALLY want to update to ${versionCheck.storeVersion}?',
-            ),
-            Text('(current version ${versionCheck.packageVersion})'),
-          ],
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('NEW Update Available'),
+        content: SingleChildScrollView(
+          child: ListBody(
+            children: [
+              Text(
+                'Do you REALLY want to update to ${versionCheck.storeVersion}?',
+              ),
+              Text('(current version ${versionCheck.packageVersion})'),
+            ],
+          ),
         ),
-      ),
-      actions: [
-        TextButton(
-          child: const Text('Update'),
-          onPressed: () async {
-            await versionCheck.launchStore();
-            unawaited(Future.delayed(const Duration(milliseconds: 300)));
-            Navigator.of(context).pop();
-          },
-        ),
-        TextButton(
-          child: const Text('Close'),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-      ],
-    ),
+        actions: [
+          TextButton(
+            child: const Text('Update'),
+            onPressed: () async {
+              await versionCheck.launchStore();
+            },
+          ),
+          TextButton(
+            child: const Text('Close'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      );
+    },
   );
 }

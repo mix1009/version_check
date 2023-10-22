@@ -1,10 +1,13 @@
 library version_check;
 
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:html/dom.dart' as dom;
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
@@ -53,7 +56,9 @@ class VersionCheck {
     final PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
     packageName ??= packageInfo.packageName;
+    log('packageName $packageName');
     packageVersion ??= packageInfo.version;
+    log('packageVersion $packageVersion');
     _country = country ?? 'us';
 
     if (getStoreVersionAndUrl == null) {
@@ -144,26 +149,76 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(String packageName) as
       final cv = elements.firstWhere((element) => element.text == 'Current Version');
       final version = cv.nextElementSibling!.text;
       return StoreVersionAndUrl(version, url);
-    } catch (_) {}
-    try {
-      final elements = doc.getElementsByTagName('script');
+    } catch (_) {
+      return redesignedVersion(doc, url);
+    }
 
-      for (final e in elements) {
-        // ignore: unnecessary_string_escapes
-        final match = RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
-        if (match != null) {
-          return StoreVersionAndUrl(match.group(1)!, url);
-        }
-      }
-    } catch (_) {}
+    /*
+    /// This flow tricky, because cannot consistent for get latest version in play store.
+  
+    // try {
+    //   final elements = doc.getElementsByTagName('script');
 
-    try {
-      final elements = doc.querySelectorAll('div');
+    //   for (final e in elements) {
+    //     // ignore: unnecessary_string_escapes
+    //     final match = RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
+    //     if (match != null) {
+    //       log('match - ${match.group(1)} - $url');
+    //       return StoreVersionAndUrl(match.group(1)!, url);
+    //     }
+    //   }
+    // } catch (_) {}
 
-      final cv = elements.firstWhere((element) => element.text == 'Current Version');
-      final version = cv.nextElementSibling!.text;
-      return StoreVersionAndUrl(version, url);
-    } catch (_) {}
+    // try {
+    //   final elements = doc.querySelectorAll('div');
+
+    //   final cv = elements.firstWhere((element) => element.text == 'Current Version');
+    //   final version = cv.nextElementSibling!.text;
+    //   return StoreVersionAndUrl(version, url);
+    // } catch (_) {}
+
+  */
+  }
+
+  return null;
+}
+
+/// Return StoreVersionAndUrl from Redesigned Play Store results.
+/// Created by upgrader package
+StoreVersionAndUrl? redesignedVersion(dom.Document response, String url) {
+  try {
+    // ignore: prefer_single_quotes
+    const patternName = ",\"name\":\"";
+    // ignore: prefer_single_quotes
+    const patternVersion = ",[[[\"";
+    // ignore: prefer_single_quotes
+    const patternCallback = "AF_initDataCallback";
+    // ignore: prefer_single_quotes
+    const patternEndOfString = "\"";
+
+    // ignore: prefer_single_quotes
+    final scripts = response.getElementsByTagName("script");
+    final infoElements = scripts.where((element) => element.text.contains(patternName));
+    final additionalInfoElements = scripts.where((element) => element.text.contains(patternCallback));
+    final additionalInfoElementsFiltered = additionalInfoElements.where((element) => element.text.contains(patternVersion));
+
+    final nameElement = infoElements.first.text;
+    final storeNameStartIndex = nameElement.indexOf(patternName) + patternName.length;
+    final storeNameEndIndex = storeNameStartIndex + nameElement.substring(storeNameStartIndex).indexOf(patternEndOfString);
+    final storeName = nameElement.substring(storeNameStartIndex, storeNameEndIndex);
+
+    // ignore: prefer_single_quotes
+    final versionElement = additionalInfoElementsFiltered.where((element) => element.text.contains("\"$storeName\"")).first.text;
+    final storeVersionStartIndex = versionElement.lastIndexOf(patternVersion) + patternVersion.length;
+    final storeVersionEndIndex = storeVersionStartIndex + versionElement.substring(storeVersionStartIndex).indexOf(patternEndOfString);
+    final storeVersion = versionElement.substring(storeVersionStartIndex, storeVersionEndIndex);
+
+    // storeVersion might be: 'Varies with device', which is not a valid version.
+    return StoreVersionAndUrl(storeVersion, url);
+  } catch (e) {
+    if (kDebugMode) {
+      print('upgrader: PlayStoreResults.redesignedVersion exception: $e');
+    }
   }
 
   return null;

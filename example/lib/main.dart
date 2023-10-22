@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -30,20 +31,15 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   String? version = '';
   String? storeVersion = '';
   String? storeUrl = '';
   String? packageName = '';
-  @override
-  void initState() {
-    super.initState();
-    checkVersion();
-  }
 
   final versionCheck = VersionCheck(
     packageName: Platform.isIOS ? 'id.smartpoultrysaas.app' : 'id.telkomiotsaas.app',
-    packageVersion: '2.0.4',
+    packageVersion: '2.0.6',
     showUpdateDialog: customShowUpdateDialog,
     country: 'id',
   );
@@ -56,6 +52,27 @@ class _MyHomePageState extends State<MyHomePage> {
       storeVersion = versionCheck.storeVersion;
       storeUrl = versionCheck.storeUrl;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    checkVersion();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.paused) {
+      checkVersion();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   @override
@@ -114,6 +131,7 @@ void customShowUpdateDialog(BuildContext context, VersionCheck versionCheck) {
           child: const Text('Update'),
           onPressed: () async {
             await versionCheck.launchStore();
+            unawaited(Future.delayed(const Duration(milliseconds: 300)));
             Navigator.of(context).pop();
           },
         ),

@@ -1,8 +1,9 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 
 void main() async {
-  String? version = await getMacStoreVersion('com.apple.logic10');
+  final String? version = await getMacStoreVersion('com.apple.logic10');
   print(version);
 }
 

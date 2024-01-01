@@ -1,3 +1,6 @@
+## [0.7.1] - 2024/01/01
+* upgrade packages
+
 ## [0.4.0] - 2023/05/25
 * upgrade packages for flutter 3.10 (PR by monfadev)
 

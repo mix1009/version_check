@@ -12,8 +12,13 @@ import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-typedef GetStoreVersionAndUrl = Future<StoreVersionAndUrl?> Function(String packageName);
-typedef ShowUpdateDialog = void Function(BuildContext context, VersionCheck versionCheck);
+typedef GetStoreVersionAndUrl = Future<StoreVersionAndUrl?> Function(
+  String packageName,
+);
+typedef ShowUpdateDialog = void Function(
+  BuildContext context,
+  VersionCheck versionCheck,
+);
 
 class StoreVersionAndUrl {
   final String storeVersion;
@@ -30,6 +35,7 @@ class VersionCheck {
   String? storeVersion;
   String? storeUrl;
   String? country;
+  bool isDialog;
 
   GetStoreVersionAndUrl? getStoreVersionAndUrl;
   ShowUpdateDialog? showUpdateDialog;
@@ -47,6 +53,7 @@ class VersionCheck {
     this.getStoreVersionAndUrl,
     this.showUpdateDialog,
     this.country,
+    this.isDialog = true,
   });
 
   /// check version from iOS/Android/Mac store and
@@ -79,10 +86,12 @@ class VersionCheck {
       storeVersion = storeVersionAndUrl.storeVersion;
       storeUrl = storeVersionAndUrl.storeUrl;
 
-      if (hasUpdate) {
-        showUpdateDialog ??= _showUpdateDialog;
-        // ignore: use_build_context_synchronously
-        showUpdateDialog!(context, this);
+      if (isDialog) {
+        if (hasUpdate) {
+          showUpdateDialog ??= _showUpdateDialog;
+          // ignore: use_build_context_synchronously
+          showUpdateDialog!(context, this);
+        }
       }
     }
   }
@@ -125,14 +134,21 @@ Future<StoreVersionAndUrl?> _getIOSStoreVersionAndUrl(String bundleId) async {
   return null;
 }
 
-Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(String packageName) async {
-  final uri = Uri.https('play.google.com', '/store/apps/details', {'id': packageName, 'hl': 'en'});
+Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(
+  String packageName,
+) async {
+  final uri = Uri.https(
+    'play.google.com',
+    '/store/apps/details',
+    {'id': packageName, 'hl': 'en'},
+  );
 
   final resp = await http.get(
     uri,
     headers: {
       'referer': 'http://www.google.com',
-      'user-agent': 'Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6',
+      'user-agent':
+          'Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6',
     },
   );
 
@@ -143,7 +159,8 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(String packageName) as
     try {
       final elements = doc.querySelectorAll('.hAyfc .BgcNfc');
 
-      final cv = elements.firstWhere((element) => element.text == 'Current Version');
+      final cv =
+          elements.firstWhere((element) => element.text == 'Current Version');
       final version = cv.nextElementSibling!.text;
       return StoreVersionAndUrl(version, url);
     } catch (_) {
@@ -195,20 +212,34 @@ StoreVersionAndUrl? redesignedVersion(dom.Document response, String url) {
 
     // ignore: prefer_single_quotes
     final scripts = response.getElementsByTagName("script");
-    final infoElements = scripts.where((element) => element.text.contains(patternName));
-    final additionalInfoElements = scripts.where((element) => element.text.contains(patternCallback));
-    final additionalInfoElementsFiltered = additionalInfoElements.where((element) => element.text.contains(patternVersion));
+    final infoElements =
+        scripts.where((element) => element.text.contains(patternName));
+    final additionalInfoElements =
+        scripts.where((element) => element.text.contains(patternCallback));
+    final additionalInfoElementsFiltered = additionalInfoElements
+        .where((element) => element.text.contains(patternVersion));
 
     final nameElement = infoElements.first.text;
-    final storeNameStartIndex = nameElement.indexOf(patternName) + patternName.length;
-    final storeNameEndIndex = storeNameStartIndex + nameElement.substring(storeNameStartIndex).indexOf(patternEndOfString);
-    final storeName = nameElement.substring(storeNameStartIndex, storeNameEndIndex);
+    final storeNameStartIndex =
+        nameElement.indexOf(patternName) + patternName.length;
+    final storeNameEndIndex = storeNameStartIndex +
+        nameElement.substring(storeNameStartIndex).indexOf(patternEndOfString);
+    final storeName =
+        nameElement.substring(storeNameStartIndex, storeNameEndIndex);
 
     // ignore: prefer_single_quotes
-    final versionElement = additionalInfoElementsFiltered.where((element) => element.text.contains("\"$storeName\"")).first.text;
-    final storeVersionStartIndex = versionElement.lastIndexOf(patternVersion) + patternVersion.length;
-    final storeVersionEndIndex = storeVersionStartIndex + versionElement.substring(storeVersionStartIndex).indexOf(patternEndOfString);
-    final storeVersion = versionElement.substring(storeVersionStartIndex, storeVersionEndIndex);
+    final versionElement = additionalInfoElementsFiltered
+        .where((element) => element.text.contains('"$storeName"'))
+        .first
+        .text;
+    final storeVersionStartIndex =
+        versionElement.lastIndexOf(patternVersion) + patternVersion.length;
+    final storeVersionEndIndex = storeVersionStartIndex +
+        versionElement
+            .substring(storeVersionStartIndex)
+            .indexOf(patternEndOfString);
+    final storeVersion =
+        versionElement.substring(storeVersionStartIndex, storeVersionEndIndex);
 
     // storeVersion might be: 'Varies with device', which is not a valid version.
     return StoreVersionAndUrl(storeVersion, url);

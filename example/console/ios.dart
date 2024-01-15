@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 void main() async {
-  final String? version = await getIOSStoreVersion('com.tachyonfactory.iconFinder');
+  final String? version =
+      await getIOSStoreVersion('com.tachyonfactory.iconFinder');
   print(version);
 }
 

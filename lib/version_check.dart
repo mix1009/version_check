@@ -35,6 +35,7 @@ class VersionCheck {
   String? storeVersion;
   String? storeUrl;
   String? country;
+  bool isDialog;
 
   GetStoreVersionAndUrl? getStoreVersionAndUrl;
   ShowUpdateDialog? showUpdateDialog;
@@ -52,6 +53,7 @@ class VersionCheck {
     this.getStoreVersionAndUrl,
     this.showUpdateDialog,
     this.country,
+    this.isDialog = true,
   });
 
   /// check version from iOS/Android/Mac store and
@@ -84,10 +86,12 @@ class VersionCheck {
       storeVersion = storeVersionAndUrl.storeVersion;
       storeUrl = storeVersionAndUrl.storeUrl;
 
-      if (hasUpdate) {
-        showUpdateDialog ??= _showUpdateDialog;
-        // ignore: use_build_context_synchronously
-        showUpdateDialog!(context, this);
+      if (isDialog) {
+        if (hasUpdate) {
+          showUpdateDialog ??= _showUpdateDialog;
+          // ignore: use_build_context_synchronously
+          showUpdateDialog!(context, this);
+        }
       }
     }
   }

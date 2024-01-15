@@ -38,11 +38,10 @@ class _MyHomePageState extends State<MyHomePage> {
   String? packageName = '';
 
   final versionCheck = VersionCheck(
-    packageName:
-        Platform.isIOS ? 'id.smartpoultrysaas.app' : 'id.telkomiotsaas.app',
+    packageName: Platform.isIOS ? 'id.smartpoultrysaas.app' : 'id.telkomiotsaas.app',
     packageVersion: '2.0.6',
     showUpdateDialog: customShowUpdateDialog,
-    country: 'id',
+    country: 'kr',
   );
 
   Future<void> checkVersion() async {

@@ -427,7 +427,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.7.1"
+    version: "0.8.0"
   vm_service:
     dependency: transitive
     description:

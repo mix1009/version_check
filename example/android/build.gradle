@@ -4,9 +4,9 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin" apply false
 }
 
-rootProject.buildDir = "../build"
+rootProject.buildDir = file("../build")
 subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
+    project.buildDir = file("${rootProject.buildDir}/${project.name}")
 }
 subprojects {
     project.evaluationDependsOn(":app")
@@ -14,4 +14,6 @@ subprojects {
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
+    delete "${rootDir}/build"
+    delete "${rootDir}/app/build"
 }

@@ -1,3 +1,11 @@
+## [0.8.0] - 2026/05/05
+* Upgrade all dependencies to latest versions (package_info_plus 10.x, http 1.6, html 0.15.6, url_launcher 6.3, flutter_lints 6.0)
+* Fix Android Play Store version parsing (redesignedVersion regex now correctly extracts version instead of returning category names like "Tools")
+* Update SDK constraints: Dart >=3.10.0, Flutter >=3.38.1
+* Modernize Android build: Gradle 8.13, AGP 8.12.1, Kotlin 2.2.0
+* Bump iOS deployment target to 13.0
+* Dart lint fixes (const constructors, super parameters)
+
 ## [0.7.1] - 2024/01/01
 * upgrade packages
 

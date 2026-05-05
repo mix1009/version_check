@@ -4,7 +4,7 @@ publish_to: 'none'
 version: 2.0.4+67
 
 environment:
-  sdk: '>=3.1.0 <4.0.0'
+  sdk: '>=3.10.0 <4.0.0'
 
 dependencies:
   flutter:
@@ -12,11 +12,12 @@ dependencies:
   version_check:
     path: ../
 
-  cupertino_icons: ^1.0.6
+  cupertino_icons: ^1.0.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true

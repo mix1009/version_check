@@ -1,5 +1,3 @@
-library version_check;
-
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
@@ -180,41 +178,33 @@ Future<StoreVersionAndUrl?> _getAndroidStoreVersionAndUrl(String packageName) as
   return null;
 }
 
-/// Return StoreVersionAndUrl from Redesigned Play Store results.
-/// Created by upgrader package
+/// Return StoreVersionAndUrl from Play Store script data.
+/// Tries multiple patterns against the current Play Store HTML structure.
 StoreVersionAndUrl? redesignedVersion(dom.Document response, String url) {
   try {
-    // ignore: prefer_single_quotes
-    const patternName = ",\"name\":\"";
-    // ignore: prefer_single_quotes
-    const patternVersion = ",[[[\"";
-    // ignore: prefer_single_quotes
-    const patternCallback = "AF_initDataCallback";
-    // ignore: prefer_single_quotes
-    const patternEndOfString = "\"";
+    final scripts = response.getElementsByTagName('script');
 
-    // ignore: prefer_single_quotes
-    final scripts = response.getElementsByTagName("script");
-    final infoElements = scripts.where((element) => element.text.contains(patternName));
-    final additionalInfoElements = scripts.where((element) => element.text.contains(patternCallback));
-    final additionalInfoElementsFiltered = additionalInfoElements.where((element) => element.text.contains(patternVersion));
+    // Pattern 1 (most precise): look for [[["x.y.z"]]] in AF_initDataCallback scripts.
+    // The version is the first triple-bracketed string in these data blobs.
+    final versionPattern = RegExp(r'\[\[\["(\d+\.\d+(?:\.\d+)*)"\]\]');
+    for (final script in scripts) {
+      if (!script.text.contains('AF_initDataCallback')) continue;
+      final match = versionPattern.firstMatch(script.text);
+      if (match != null) {
+        return StoreVersionAndUrl(match.group(1)!, url);
+      }
+    }
 
-    final nameElement = infoElements.first.text;
-    final storeNameStartIndex = nameElement.indexOf(patternName) + patternName.length;
-    final storeNameEndIndex = storeNameStartIndex + nameElement.substring(storeNameStartIndex).indexOf(patternEndOfString);
-    final storeName = nameElement.substring(storeNameStartIndex, storeNameEndIndex);
-
-    // ignore: prefer_single_quotes
-    final versionElement = additionalInfoElementsFiltered.where((element) => element.text.contains("\"$storeName\"")).first.text;
-    final storeVersionStartIndex = versionElement.lastIndexOf(patternVersion) + patternVersion.length;
-    final storeVersionEndIndex = storeVersionStartIndex + versionElement.substring(storeVersionStartIndex).indexOf(patternEndOfString);
-    final storeVersion = versionElement.substring(storeVersionStartIndex, storeVersionEndIndex);
-
-    // storeVersion might be: 'Varies with device', which is not a valid version.
-    return StoreVersionAndUrl(storeVersion, url);
+    // Pattern 2: same regex but search all scripts in case AF_initDataCallback label changes.
+    for (final script in scripts) {
+      final match = versionPattern.firstMatch(script.text);
+      if (match != null) {
+        return StoreVersionAndUrl(match.group(1)!, url);
+      }
+    }
   } catch (e) {
     if (kDebugMode) {
-      print('upgrader: PlayStoreResults.redesignedVersion exception: $e');
+      print('version_check: redesignedVersion exception: $e');
     }
   }
 

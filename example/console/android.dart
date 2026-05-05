@@ -1,3 +1,4 @@
+// ignore_for_file: avoid_print
 import 'package:html/parser.dart' show parse;
 import 'package:http/http.dart' as http;
 
@@ -35,7 +36,7 @@ Future<String?> getAndroidStoreVersion(String packageName) async {
       final elements = doc.getElementsByTagName('script');
 
       for (final e in elements) {
-        final match = new RegExp('\"(\\d+\\.\\d+\\.\\d+)\"').firstMatch(e.text);
+        final match = RegExp(r'"(\d+\.\d+\.\d+)"').firstMatch(e.text);
         if (match != null) {
           return match.group(1);
         }
